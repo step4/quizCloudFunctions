@@ -92,6 +92,10 @@ createNewObject = async className => {
   return new (Parse.Object.extend(className))()
 }
 
+function isSetAndOfType(object,type){
+  return object !== undefined && typeof object === type
+}
+
 module.exports = {
   asMaster,
   isLoggedIn,
@@ -99,5 +103,6 @@ module.exports = {
   hasLecturerPermission,
   getObjectById,
   getObjectByName,
-  createNewObject
+  createNewObject,
+  isSetAndOfType
 }
