@@ -41,14 +41,46 @@ hasAdminPermission = async user => {
   return true
 }
 
-getObjectIfExist = async (className, id) => {
-  const Object = Parse.Object.extend(className)
-  let objectQuery = new Parse.Query(Object)
+getObjectById = async (className, id) => {
+  let Class
+  if(typeof className === 'string'){
+    Class = Parse.Object.extend(className)
+  }else if(typeof className === 'function'){
+    classname = className.name
+    Class = Parse.Object.extend(className)
+  }else{
+    throw new Error("First parameter is not a string or a parse class")
+  }
+  let objectQuery = new Parse.Query(Class)
   let object
   try {
     object = await objectQuery.get(id, asMaster)
     if (!object) {
-      throw `object of class: ${className} with id: ${id} not found`
+      throw new Error(`object of class '${className}' with id '${id}' not found`)
+    }
+    return object
+  } catch (error) {
+    throw error
+  }
+}
+getObjectByName = async (className, name) => {
+  let Class
+  if(typeof className === 'string'){
+    Class = Parse.Object.extend(className)
+  }else if(typeof className === 'function'){
+    className = className.className
+    Class = Parse.Object.extend(className)
+  }else{
+    throw new Error("First parameter is not a string or a parse class")
+  }
+
+  let objectQuery = new Parse.Query(Class)
+  objectQuery.equalTo('name',name)
+  let object
+  try {
+    object = await objectQuery.first(asMaster)
+    if (!object) {
+      throw new Error(`object of class '${className}' with name '${name}' not found`)
     }
     return object
   } catch (error) {
@@ -65,6 +97,7 @@ module.exports = {
   isLoggedIn,
   hasAdminPermission,
   hasLecturerPermission,
-  getObjectIfExist,
+  getObjectById,
+  getObjectByName,
   createNewObject
 }
