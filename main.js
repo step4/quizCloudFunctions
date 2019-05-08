@@ -5,6 +5,7 @@ var Startup = require('./modules/startup')
 automaticModuleDefinitions.push( require('./modules/studyProgram') )
 automaticModuleDefinitions.push( require('./modules/course') )
 automaticModuleDefinitions.push( require('./modules/question') )
+automaticModuleDefinitions.push(require('./modules/game'))
 
 Parse.Cloud.define('user_login', Auth.userLogin)
 
