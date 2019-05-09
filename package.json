@@ -18,6 +18,7 @@
   "homepage": "https://github.com/step4/quizCloudFunctions#readme",
   "dependencies": {
     "axios": "^0.18.0",
+    "axios-debug": "0.0.4",
     "lodash": "^4.17.11"
   }
 }
