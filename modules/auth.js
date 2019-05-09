@@ -4,7 +4,6 @@ module.exports = {
       throw 'not authorized'
     }
     let username = request.params.nameID
-    let readableUsername = request.params.readableName
     let query = new Parse.Query('User')
     query.equalTo('username', username)
     let result = await query.find({ useMasterKey: true })
@@ -17,11 +16,9 @@ module.exports = {
     if (result.length == 0) {
       user.set('username', username)
       user.set('password', username)
-      user.set('readableUsername', readableUsername)
       user.set('email', '')
       user.set('firstName', '')
       user.set('lastName', '')
-      user.set('semester', 0)
       user.set('studyProgram', null)
 
       try {

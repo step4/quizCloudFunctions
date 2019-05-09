@@ -2,7 +2,7 @@ const axios = require('axios')
 
 const appId = process.env.APP_ID || 'parseServerId'
 const masterKey = process.env.MASTER_KEY || 'parseMasterKey'
-const serverURL = process.env.SERVER_URL || '127.0.0.1'
+const port = process.env.PORT || 8080
 
 module.exports = {
   serverStartup: async request => {
@@ -32,7 +32,7 @@ module.exports = {
       'X-Parse-Master-Key': masterKey
     }
     try {
-      let result = await axios.get(`${serverURL}/schemas`, { headers })
+      let result = await axios.get(`http://localhost:${port}/schemas`, { headers })
       result.data.results.forEach(async element => {
         // if (element.className != '_User') {
         let clp = null
@@ -40,7 +40,11 @@ module.exports = {
         else clp = initialCLP
 
         try {
-          let result = await axios.put(`${serverURL}/schemas/${element.className}`, { classLevelPermissions: clp }, { headers })
+          let result = await axios.put(
+            `http://localhost:${port}/schemas/${element.className}`,
+            { classLevelPermissions: clp },
+            { headers }
+          )
         } catch (error) {
           console.log(error)
         }
