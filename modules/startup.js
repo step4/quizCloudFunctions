@@ -36,7 +36,7 @@ module.exports = {
       let result = await axios.get(`${serverURLBackend}/schemas`, { headers })
       result.data.results.forEach(async element => {
         // if (element.className != '_User') {
-        console.log('working on: ', element.className)
+        // console.log('working on: ', element.className)
         let clp = null
         if (element.className === '_User' || element.className === '_Role') clp = initialCLPUserRole
         else clp = initialCLP

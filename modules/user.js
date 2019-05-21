@@ -32,5 +32,24 @@ module.exports = {
         throw error
       }
     }
+  },
+  getMe: {
+    name: 'get_me',
+    handler: async request => {
+      let currentUser = request.user
+      if (!(await isLoggedIn(currentUser))) return new Error('User not logged in')
+
+      try {
+        await currentUser.fetch(asMaster)
+        const playerName = currentUser.get('playerName') || ''
+        const studyProgram = currentUser.get('studyProgram') || { id: '' }
+        const studyProgramId = studyProgram.id
+        const avatarUrl = currentUser.get('avatarUrl') || ''
+
+        return { playerName, studyProgramId, avatarUrl }
+      } catch (error) {
+        throw error
+      }
+    }
   }
 }

@@ -17,8 +17,8 @@ module.exports = {
       user.set('username', username)
       user.set('password', username)
       user.set('email', '')
-      user.set('firstName', '')
-      user.set('lastName', '')
+      user.set('firstname', '')
+      user.set('lastname', '')
       user.set('studyProgram', null)
 
       try {
