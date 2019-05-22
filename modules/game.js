@@ -23,9 +23,11 @@ module.exports = {
 
       const { numberOfQuestions, difficulty, withTimer, courseId } = request.params
       let newGame = new Game()
+      let newGameResponse = {}
       try {
         newGame.set('player', currentUser)
-        newGame.set('rightQuestions', [])
+        newGame.set('givenAnswers', [])
+        newGame.set('score', 0)
         newGame.set('finished', false)
 
         if (isSetAndOfType(difficulty, 'number')) {
@@ -51,6 +53,18 @@ module.exports = {
           let questionNewGameRelation = newGame.relation('questions')
           questionNewGameRelation.add(questions)
           await newGame.save(null, asMaster)
+
+          newGameResponse.questions = questions.map(question => {
+            const questionText = question.get('questionText')
+            const answers = question.get('answers')
+            const hasLatex = question.get('hasLatex')
+            return { questionText, answers, hasLatex }
+          })
+          newGameResponse.finished = newGame.get('finished')
+          newGameResponse.difficulty = newGame.get('difficulty')
+          newGameResponse.withTimer = newGame.get('withTimer')
+          newGameResponse.givenAnswers = newGame.get('givenAnswers')
+          newGameResponse.score = newGame.get('score')
         } else {
           throw new Error('numberOfQuestions not set or wrong type')
         }
@@ -59,7 +73,7 @@ module.exports = {
         throw error
       }
 
-      return newGame
+      return newGameResponse
     }
   },
   finishGame: {
@@ -68,14 +82,14 @@ module.exports = {
       let currentUser = request.user
       if (!(await isLoggedIn(currentUser))) return new Error('User not logged in')
 
-      const { gameId, rightQuestions } = request.params
+      const { gameId, givenAnswers } = request.params
 
       try {
         let game = await getObjectById(Game, gameId)
         if (game.get('finished') === true) {
           throw new Error('game already finished')
         }
-        game.set('rightQuestions', rightQuestions)
+        game.set('givenAnswers', givenAnswers)
         game.set('finished', true)
         game.save(null, asMaster)
       } catch (error) {
