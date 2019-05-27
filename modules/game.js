@@ -55,16 +55,18 @@ module.exports = {
           await newGame.save(null, asMaster)
 
           newGameResponse.questions = questions.map(question => {
+            const questionId = question.id
             const questionText = question.get('questionText')
             const answers = question.get('answers')
             const hasLatex = question.get('hasLatex')
-            return { questionText, answers, hasLatex }
+            return { questionId, questionText, answers, hasLatex }
           })
           newGameResponse.finished = newGame.get('finished')
           newGameResponse.difficulty = newGame.get('difficulty')
           newGameResponse.withTimer = newGame.get('withTimer')
           newGameResponse.givenAnswers = newGame.get('givenAnswers')
           newGameResponse.score = newGame.get('score')
+          newGameResponse.gameId = newGame.id
         } else {
           throw new Error('numberOfQuestions not set or wrong type')
         }
