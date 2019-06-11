@@ -41,7 +41,8 @@ module.exports = {
 
       try {
         await currentUser.fetch(asMaster)
-        const playerName = currentUser.get('playerName') || ''
+
+        const playerName = currentUser.get('playerName') || currentUser.get('username') || ''
         const studyProgram = currentUser.get('studyProgram') || { id: '' }
         const studyProgramId = studyProgram.id
         const avatarUrl = currentUser.get('avatarUrl') || ''
