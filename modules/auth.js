@@ -37,11 +37,6 @@ module.exports = {
           studentRole.getUsers().add(user)
           await studentRole.save(null, { useMasterKey: true })
         }
-      } catch (error) {
-        throw error
-      }
-
-      try {
         user.set('role', studentRole)
         await user.save(null, { useMasterKey: true })
       } catch (error) {

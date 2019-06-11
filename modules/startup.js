@@ -22,7 +22,9 @@ module.exports = {
       get: {
         '*': true
       },
-      create: {},
+      create: {
+        '*': true
+      },
       update: {},
       delete: {},
       addField: {}
