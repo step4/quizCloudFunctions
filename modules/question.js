@@ -1,13 +1,4 @@
-const {
-  asMaster,
-  isLoggedIn,
-  hasAdminPermission,
-  hasLecturerPermission,
-  getObjectById,
-  getObjectByName,
-  createNewObject,
-  isSetAndOfType
-} = require('../utils')
+const { asMaster, isLoggedIn, hasAdminPermission, hasLecturerPermission, getObjectById, getObjectByName, createNewObject, isSetAndOfType } = require('../utils')
 
 const Question = Parse.Object.extend('Question')
 const Course = Parse.Object.extend('Course')
@@ -36,11 +27,11 @@ module.exports = {
           throw new Error('difficulty not set or wrong type')
         }
 
-        if (isSetAndOfType(hasLatex, 'boolean')) {
-          newQuestion.set('hasLatex', hasLatex)
-        } else {
-          throw new Error('hasLatex not set or wrong type')
-        }
+        // if (isSetAndOfType(hasLatex, 'boolean')) {
+        //   newQuestion.set('hasLatex', hasLatex)
+        // } else {
+        //   throw new Error('hasLatex not set or wrong type')
+        // }
 
         if (Array.isArray(answers) && answers.length > 0) {
           answers.forEach(element => {
@@ -48,9 +39,9 @@ module.exports = {
             if (!isSetAndOfType(answerText, 'string')) {
               throw new Error('Atleast one answer text is not set or not a string')
             }
-            if (!isSetAndOfType(hasLatex, 'boolean')) {
-              throw new Error('Atleast one hasLatex in answers is not set or not a boolean')
-            }
+            // if (!isSetAndOfType(hasLatex, 'boolean')) {
+            //   throw new Error('Atleast one hasLatex in answers is not set or not a boolean')
+            // }
             if (!isSetAndOfType(isRightAnswer, 'boolean')) {
               throw new Error('Atleast one isRightAnswer is not set or not a boolean')
             }
