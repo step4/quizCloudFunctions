@@ -1,12 +1,4 @@
-const {
-  asMaster,
-  isLoggedIn,
-  hasAdminPermission,
-  hasLecturerPermission,
-  getObjectById,
-  getObjectByName,
-  createNewObject
-} = require('../utils')
+const { asMaster, isLoggedIn, hasAdminPermission, hasLecturerPermission, getObjectById, getObjectByName, createNewObject } = require('../utils')
 
 const StudyProgram = Parse.Object.extend('StudyProgram')
 const Faculty = Parse.Object.extend('Faculty')
@@ -18,6 +10,9 @@ module.exports = {
       let currentUser = request.user
       if (!(await isLoggedIn(currentUser))) return new Error('User not logged in')
 
+      let { withIcons } = request.params
+      const sendIcons = withIcons === undefined ? true : withIcons == 'true'
+
       let facultyQuery = new Parse.Query(Faculty)
       let faculties
       let studyProgramsResponse = []
@@ -27,6 +22,7 @@ module.exports = {
 
         for (const faculty of faculties) {
           let name = faculty.get('name')
+          let id = faculty.id
           let studyProgramsRelation = faculty.relation('studyPrograms')
           let studyProgramsQuery = studyProgramsRelation.query()
           let studyPrograms = await studyProgramsQuery.find(asMaster)
@@ -34,10 +30,10 @@ module.exports = {
             const id = studyProgram.id
             const name = studyProgram.get('name')
             const shortName = studyProgram.get('shortName')
-            const iconB64 = studyProgram.get('iconB64')
+            const iconB64 = sendIcons ? studyProgram.get('iconB64') : ''
             return { id, name, iconB64, shortName }
           })
-          studyProgramsResponse.push({ name, studyPrograms })
+          studyProgramsResponse.push({ id, name, studyPrograms })
         }
       } catch (error) {
         throw error
