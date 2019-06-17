@@ -20,5 +20,8 @@
     "axios": "^0.18.0",
     "axios-debug": "0.0.4",
     "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "@types/parse": "^2.2.5"
   }
 }

@@ -1,5 +1,5 @@
-module.exports = {
-  userLogin: async request => {
+export default {
+  userLogin: async (request: Parse.Cloud.FunctionRequest) => {
     if (!request.master) {
       throw 'not authorized'
     }

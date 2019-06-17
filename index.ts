@@ -15,6 +15,9 @@ Parse.Cloud.define('server_startup', Startup.serverStartup)
 
 automaticModuleDefinitions.forEach(moduleDefiniton => {
   for (var cloudFunction in moduleDefiniton) {
-    Parse.Cloud.define(moduleDefiniton[cloudFunction].name, moduleDefiniton[cloudFunction].handler)
+    Parse.Cloud.define(
+      moduleDefiniton[cloudFunction].name,
+      moduleDefiniton[cloudFunction].handler
+    )
   }
 })
