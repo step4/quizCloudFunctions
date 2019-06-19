@@ -14,6 +14,7 @@ module.exports = {
       const { questionText, hasLatex, answers, difficulty, courseIds } = request.params
 
       let newQuestion = new Question()
+      newQuestion.set('createdBy', currentUser)
       try {
         if (isSetAndOfType(questionText, 'string')) {
           newQuestion.set('questionText', questionText)
@@ -69,6 +70,50 @@ module.exports = {
       }
 
       return true
+    }
+  },
+  getQuestions: {
+    name: 'get_questions',
+    handler: async request => {
+      let currentUser = request.user
+      if (!(await isLoggedIn(currentUser))) return new Error('User not logged in')
+      if (!(await hasLecturerPermission(currentUser))) return new Error('User is not lecturer')
+
+      let questionQuery = new Parse.Query(Question)
+      questionQuery.equalTo('createdBy', currentUser)
+      questionQuery.include('createdBy')
+      let questionsResponse = []
+      try {
+        let questions = await questionQuery.find(asMaster)
+        if (!questions) {
+          throw new Error('no questions found')
+        }
+
+        for (const question of questions) {
+          const questionText = question.get('questionText')
+          const answers = question.get('answers')
+          const difficulty = question.get('difficulty')
+          let user = question.get('createdBy')
+          user = {
+            id: user.id,
+            username: user.get('username'),
+            playerName: user.get('playerName'),
+            avatarUrl: user.get('avatarUrl')
+          }
+
+          const id = question.id
+          questionsResponse.push({
+            questionText,
+            answers,
+            difficulty,
+            user,
+            id
+          })
+        }
+        return questionsResponse
+      } catch (e) {
+        throw e
+      }
     }
   }
 }
