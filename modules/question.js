@@ -11,7 +11,7 @@ module.exports = {
       if (!(await isLoggedIn(currentUser))) return new Error('User not logged in')
       if (!(await hasLecturerPermission(currentUser))) return new Error('User is not lecturer')
 
-      const { questionText, hasLatex, answers, difficulty, courseIds } = request.params
+      const { questionText, hasLatex, answers, difficulty, courseIds, customTime } = request.params
 
       let newQuestion = new Question()
       newQuestion.set('createdBy', currentUser)
@@ -27,7 +27,7 @@ module.exports = {
         } else {
           throw new Error('difficulty not set or wrong type')
         }
-
+        newQuestion.set('customTime', customTime)
         // if (isSetAndOfType(hasLatex, 'boolean')) {
         //   newQuestion.set('hasLatex', hasLatex)
         // } else {
@@ -60,6 +60,10 @@ module.exports = {
             let questionRelation = course.relation('questions')
             questionRelation.add(newQuestion)
             await course.save(null, asMaster)
+
+            const courseQuestionsAddedRelation = currentUser.relation('courseQuestionsAdded')
+            courseQuestionsAddedRelation.add(course)
+            await currentUser.save(null, asMaster)
           }
         } else {
           throw new Error('courseIds not set or wrong type')
@@ -79,38 +83,49 @@ module.exports = {
       if (!(await isLoggedIn(currentUser))) return new Error('User not logged in')
       if (!(await hasLecturerPermission(currentUser))) return new Error('User is not lecturer')
 
-      let questionQuery = new Parse.Query(Question)
-      questionQuery.equalTo('createdBy', currentUser)
-      questionQuery.include('createdBy')
-      let questionsResponse = []
       try {
-        let questions = await questionQuery.find(asMaster)
-        if (!questions) {
-          throw new Error('no questions found')
-        }
+        const courseQuestionsAddedQuery = currentUser.relation('courseQuestionsAdded').query()
+        const courseQuestionsAdded = await courseQuestionsAddedQuery.find(asMaster)
+        let coursesWithQuestionResponse = []
 
-        for (const question of questions) {
-          const questionText = question.get('questionText')
-          const answers = question.get('answers')
-          const difficulty = question.get('difficulty')
-          let user = question.get('createdBy')
-          user = {
-            id: user.id,
-            username: user.get('username'),
-            playerName: user.get('playerName'),
-            avatarUrl: user.get('avatarUrl')
+        for (const course of courseQuestionsAdded) {
+          let questionQuery = course.relation('questions').query()
+          questionQuery.equalTo('createdBy', currentUser)
+          questionQuery.include('createdBy')
+          let questions = await questionQuery.find(asMaster)
+
+          let questionsResponse = []
+          for (const question of questions) {
+            const questionText = question.get('questionText')
+            const answers = question.get('answers')
+            const difficulty = question.get('difficulty')
+            const customTime = question.get('customTime')
+            let user = question.get('createdBy')
+            user = {
+              id: user.id,
+              username: user.get('username'),
+              playerName: user.get('playerName'),
+              avatarUrl: user.get('avatarUrl')
+            }
+            const id = question.id
+            questionsResponse.push({
+              questionText,
+              answers,
+              difficulty,
+              user,
+              customTime,
+              id
+            })
           }
 
-          const id = question.id
-          questionsResponse.push({
-            questionText,
-            answers,
-            difficulty,
-            user,
-            id
+          coursesWithQuestionResponse.push({
+            id: course.id,
+            name: course.get('name'),
+            questions: questionsResponse
           })
         }
-        return questionsResponse
+
+        return coursesWithQuestionResponse
       } catch (e) {
         throw e
       }
