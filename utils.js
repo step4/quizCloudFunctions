@@ -3,8 +3,7 @@ const asMaster = {
 }
 
 isLoggedIn = async user => {
-  if (!user) throw 'not authorized, please login'
-  return true
+  return !!user
 }
 
 hasLecturerPermission = async user => {
@@ -19,7 +18,6 @@ hasLecturerPermission = async user => {
   let mainQuery = Parse.Query.or(isAdminRoleQuery, isLecturerRoleQuery)
   try {
     let queryRes = await mainQuery.first(asMaster)
-    if (!queryRes) throw 'not authorized, wrong role'
   } catch (error) {
     throw error
   }
@@ -33,7 +31,6 @@ hasAdminPermission = async user => {
   isAdminRoleQuery.equalTo('users', user)
   try {
     let queryRes = await isAdminRoleQuery.first(asMaster)
-    if (!queryRes) throw 'not authorized, wrong role'
   } catch (error) {
     throw error
   }
@@ -43,13 +40,13 @@ hasAdminPermission = async user => {
 
 getObjectById = async (className, id) => {
   let Class
-  if(typeof className === 'string'){
+  if (typeof className === 'string') {
     Class = Parse.Object.extend(className)
-  }else if(typeof className === 'function'){
+  } else if (typeof className === 'function') {
     classname = className.name
     Class = Parse.Object.extend(className)
-  }else{
-    throw new Error("First parameter is not a string or a parse class")
+  } else {
+    throw new Error('First parameter is not a string or a parse class')
   }
   let objectQuery = new Parse.Query(Class)
   let object
@@ -65,17 +62,17 @@ getObjectById = async (className, id) => {
 }
 getObjectByName = async (className, name) => {
   let Class
-  if(typeof className === 'string'){
+  if (typeof className === 'string') {
     Class = Parse.Object.extend(className)
-  }else if(typeof className === 'function'){
+  } else if (typeof className === 'function') {
     className = className.className
     Class = Parse.Object.extend(className)
-  }else{
-    throw new Error("First parameter is not a string or a parse class")
+  } else {
+    throw new Error('First parameter is not a string or a parse class')
   }
 
   let objectQuery = new Parse.Query(Class)
-  objectQuery.equalTo('name',name)
+  objectQuery.equalTo('name', name)
   let object
   try {
     object = await objectQuery.first(asMaster)
@@ -92,7 +89,7 @@ createNewObject = async className => {
   return new (Parse.Object.extend(className))()
 }
 
-function isSetAndOfType(object,type){
+function isSetAndOfType(object, type) {
   return object !== undefined && typeof object === type
 }
 

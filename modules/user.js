@@ -42,12 +42,20 @@ module.exports = {
       try {
         await currentUser.fetch(asMaster)
 
+        let highestRole = currentUser.get('highestRole')
+        await highestRole.fetch(asMaster)
+        highestRole = {
+          name: highestRole.get('name'),
+          id: highestRole.id
+        }
         const playerName = currentUser.get('playerName') || currentUser.get('username') || ''
         const studyProgram = currentUser.get('studyProgram') || { id: '' }
         const studyProgramId = studyProgram.id
         const avatarUrl = currentUser.get('avatarUrl') || ''
+        const username = currentUser.get('username') || ''
+        const email = currentUser.get('email') || ''
 
-        return { playerName, studyProgramId, avatarUrl }
+        return { playerName, studyProgramId, avatarUrl, username, email, highestRole }
       } catch (error) {
         throw error
       }
