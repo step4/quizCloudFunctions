@@ -20,7 +20,7 @@ module.exports = {
       if (!(await isLoggedIn(currentUser))) return new Error('User not logged in')
       if (!(await hasLecturerPermission(currentUser))) return new Error('User is not lecturer')
 
-      const { questionText, answers, difficulty, courseId, customTime, id } = request.params
+      const { questionText, answers, difficulty, courseId, customTime, id, solutionText } = request.params
       isNewQuestion = id === null
       let question
       if (isNewQuestion) {
@@ -35,6 +35,8 @@ module.exports = {
         question.set('difficulty', difficulty)
 
         question.set('customTime', customTime)
+
+        question.set('solutionText', solutionText)
 
         if (Array.isArray(answers) && answers.length > 0) {
           answers.forEach(element => {
@@ -66,6 +68,35 @@ module.exports = {
         await currentUser.save(null, asMaster)
       } catch (error) {
         await question.destroy(asMaster)
+        throw error
+      }
+
+      return true
+    }
+  },
+  deleteQuestion: {
+    name: 'delete_question',
+    handler: async request => {
+      let currentUser = request.user
+      if (!(await isLoggedIn(currentUser))) return new Error('User not logged in')
+      if (!(await hasLecturerPermission(currentUser))) return new Error('User is not lecturer')
+
+      const { id } = request.params
+
+      try {
+        const isAdmin = await hasAdminPermission(currentUser)
+        const question = await getObjectById(Question, id)
+
+        let hasPermissionToDelete = false
+        if (question.get('createdBy') == currentUser) hasPermissionToDelete = true
+        if (isAdmin) hasPermissionToDelete = true
+
+        if (!hasPermissionToDelete) throw new Error('No permission to delete')
+
+        await question.destroy(asMaster)
+
+        // TODO check courseQuestionsAdded from user
+      } catch (error) {
         throw error
       }
 
@@ -113,7 +144,10 @@ module.exports = {
             const answers = question.get('answers')
             const difficulty = question.get('difficulty')
             const customTime = question.get('customTime')
+            const solutionText = question.get('solutionText')
+            const updatedAt = question.get('updatedAt').toISOString()
             let user = question.get('createdBy')
+
             user = {
               id: user.id || undefined,
               username: user.get('username'),
@@ -127,7 +161,9 @@ module.exports = {
               difficulty,
               user,
               customTime,
-              id
+              id,
+              updatedAt,
+              solutionText
             })
           }
 
