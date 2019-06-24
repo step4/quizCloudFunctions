@@ -10,6 +10,7 @@ const {
 } = require('../utils')
 
 const Question = Parse.Object.extend('Question')
+const DeletedQuestion = Parse.Object.extend('DeletedQuestion')
 const Course = Parse.Object.extend('Course')
 
 module.exports = {
@@ -92,7 +93,9 @@ module.exports = {
         if (isAdmin) hasPermissionToDelete = true
 
         if (!hasPermissionToDelete) throw new Error('No permission to delete')
-
+        questionDeleted = question.clone()
+        questionDeleted.className = 'DeletedQuestion'
+        await questionDeleted.save(null, asMaster)
         await question.destroy(asMaster)
 
         // TODO check courseQuestionsAdded from user
