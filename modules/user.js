@@ -60,5 +60,21 @@ module.exports = {
         throw error
       }
     }
+  },
+  setMe: {
+    name: 'set_me',
+    handler: async request => {
+      let currentUser = request.user
+      if (!(await isLoggedIn(currentUser))) return new Error('User not logged in')
+      newUserData = request.params
+      try {
+        for (const key in newUserData) {
+          currentUser.set(key, newUserData[key])
+        }
+        currentUser.save(null, asMaster)
+      } catch (error) {
+        throw error
+      }
+    }
   }
 }
