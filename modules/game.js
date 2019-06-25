@@ -30,46 +30,39 @@ module.exports = {
         newGame.set('score', 0)
         newGame.set('finished', false)
 
-        if (isSetAndOfType(difficulty, 'number')) {
-          newGame.set('difficulty', difficulty)
-        } else {
-          throw new Error('difficulty not set or wrong type')
-        }
-        if (isSetAndOfType(withTimer, 'boolean')) {
-          newGame.set('withTimer', withTimer)
-        } else {
-          throw new Error('withTimer not set or wrong type')
-        }
-        if (isSetAndOfType(numberOfQuestions, 'number')) {
-          let course = await getObjectById(Course, courseId)
-          let questionCourseRelation = course.relation('questions')
-          let questionsQuery = questionCourseRelation.query()
-          let questions = await questionsQuery.find(asMaster)
-          if (questions.length < numberOfQuestions) {
-            throw new Error('Not enough questions in course')
-          }
-          questions = loSampleSize(questions, numberOfQuestions)
+        newGame.set('difficulty', difficulty)
 
-          let questionNewGameRelation = newGame.relation('questions')
-          questionNewGameRelation.add(questions)
-          await newGame.save(null, asMaster)
+        newGame.set('withTimer', withTimer)
 
-          newGameResponse.questions = questions.map(question => {
-            const questionId = question.id
-            const questionText = question.get('questionText')
-            const answers = question.get('answers')
-            const hasLatex = question.get('hasLatex')
-            return { questionId, questionText, answers, hasLatex }
-          })
-          newGameResponse.finished = newGame.get('finished')
-          newGameResponse.difficulty = newGame.get('difficulty')
-          newGameResponse.withTimer = newGame.get('withTimer')
-          newGameResponse.givenAnswers = newGame.get('givenAnswers')
-          newGameResponse.score = newGame.get('score')
-          newGameResponse.gameId = newGame.id
-        } else {
-          throw new Error('numberOfQuestions not set or wrong type')
+        let course = await getObjectById(Course, courseId)
+        newGame.set('course', course)
+
+        let questionCourseRelation = course.relation('questions')
+        let questionsQuery = questionCourseRelation.query()
+        let questions = await questionsQuery.find(asMaster)
+        if (questions.length < numberOfQuestions) {
+          throw new Error('Not enough questions in course')
         }
+        questions = loSampleSize(questions, numberOfQuestions)
+
+        let questionNewGameRelation = newGame.relation('questions')
+        questionNewGameRelation.add(questions)
+        await newGame.save(null, asMaster)
+
+        newGameResponse.questions = questions.map(question => {
+          const questionId = question.id
+          const questionText = question.get('questionText')
+          const answers = question.get('answers')
+          const difficulty = question.get('difficulty')
+          const customTime = question.get('customTime')
+          return { questionId, questionText, answers, difficulty, customTime }
+        })
+        newGameResponse.finished = newGame.get('finished')
+        newGameResponse.difficulty = newGame.get('difficulty')
+        newGameResponse.withTimer = newGame.get('withTimer')
+        newGameResponse.givenAnswers = newGame.get('givenAnswers')
+        newGameResponse.score = newGame.get('score')
+        newGameResponse.gameId = newGame.id
       } catch (error) {
         await newGame.destroy(asMaster)
         throw error

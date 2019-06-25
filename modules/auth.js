@@ -37,7 +37,7 @@ module.exports = {
           studentRole.getUsers().add(user)
           await studentRole.save(null, { useMasterKey: true })
         }
-        user.set('role', studentRole)
+        user.set('highestRole', studentRole)
         await user.save(null, { useMasterKey: true })
       } catch (error) {
         throw error
@@ -47,5 +47,25 @@ module.exports = {
     user = await Parse.User.logIn(username, username)
 
     return user.getSessionToken()
+  },
+  setStudentRole: async request => {
+    const user = request.object
+    if (user.get('highestRole')) return
+    let studentRoleQuery = new Parse.Query(Parse.Role)
+    studentRoleQuery.equalTo('name', 'student')
+    studentRole = await studentRoleQuery.first({ useMasterKey: true })
+
+    user.set('highestRole', studentRole)
+  },
+  addUserToStudentRole: async request => {
+    const user = request.object
+    if (user.get('highestRole')) return
+    let studentRoleQuery = new Parse.Query(Parse.Role)
+    studentRoleQuery.equalTo('name', 'student')
+    studentRole = await studentRoleQuery.first({ useMasterKey: true })
+    if (studentRole) {
+      studentRole.getUsers().add(user)
+      await studentRole.save(null, { useMasterKey: true })
+    }
   }
 }

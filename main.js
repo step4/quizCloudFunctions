@@ -10,6 +10,8 @@ automaticModuleDefinitions.push(require('./modules/friendRequest'))
 automaticModuleDefinitions.push(require('./modules/user'))
 
 Parse.Cloud.define('user_login', Auth.userLogin)
+Parse.Cloud.beforeSave(Parse.User, Auth.setStudentRole)
+Parse.Cloud.afterSave(Parse.User, Auth.addUserToStudentRole)
 
 Parse.Cloud.define('server_startup', Startup.serverStartup)
 
