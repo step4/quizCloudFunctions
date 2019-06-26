@@ -155,7 +155,7 @@ module.exports = {
               id: user.id || undefined,
               username: user.get('username'),
               playerName: user.get('playerName'),
-              avatarUrl: user.get('avatarUrl')
+              avatarUrl: user.get('avatarUrl') || ''
             }
             const id = question.id
             questionsResponse.push({

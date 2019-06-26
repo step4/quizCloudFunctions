@@ -77,14 +77,16 @@ module.exports = {
       let currentUser = request.user
       if (!(await isLoggedIn(currentUser))) return new Error('User not logged in')
 
-      const { gameId, givenAnswers } = request.params
+      const { gameId, givenAnswers, rightAnswerCount } = request.params
 
       try {
         let game = await getObjectById(Game, gameId)
         if (game.get('finished') === true) {
           throw new Error('game already finished')
         }
+        game.set('rightAnswerCount', rightAnswerCount)
         game.set('givenAnswers', givenAnswers)
+        game.set('score', score)
         game.set('finished', true)
         game.save(null, asMaster)
       } catch (error) {
@@ -92,6 +94,107 @@ module.exports = {
       }
 
       return true
+    }
+  },
+  getPlayedGames: {
+    name: 'get_played_games',
+    handler: async request => {
+      let currentUser = request.user
+      if (!(await isLoggedIn(currentUser))) return new Error('User not logged in')
+
+      const isAdmin = await hasAdminPermission(currentUser)
+      let { getAll } = request.params
+      getAll = getAll || false
+      if (getAll && !isAdmin) {
+        throw new Error('User is not an admin')
+      }
+      let gamesQuery = new Parse.Query(Game)
+      if (!getAll) {
+        gamesQuery.equalTo('player', currentUser)
+      }
+
+      gamesQuery.include('player')
+      gamesQuery.include('course')
+
+      try {
+        const games = await gamesQuery.find(asMaster)
+
+        let gamesResponse = []
+        for (game of games) {
+          if (game.get('finished') == false) continue
+
+          let player = game.get('player')
+          player = {
+            id: player.id || undefined,
+            username: player.get('username'),
+            playerName: player.get('playerName'),
+            avatarUrl: player.get('avatarUrl')
+          }
+          let course = game.get('course')
+          course = {
+            id: course.id,
+            name: course.get('name') || 'noName'
+          }
+          const givenAnswers = game.get('givenAnswers')
+          const score = game.get('score')
+          const difficulty = game.get('difficulty')
+          const rightAnswerCount = game.get('rightAnswerCount')
+          const withTimer = game.get('withTimer')
+          const playedAt = game.get('updatedAt').toISOString()
+          const id = game.id
+
+          const questionRelationQuery = game.get('questions').query()
+          const questions = await questionRelationQuery.find(asMaster)
+
+          let questionsResponse = []
+          for (const question of questions) {
+            const questionText = question.get('questionText')
+            const answers = question.get('answers')
+            const difficulty = question.get('difficulty')
+            const customTime = question.get('customTime')
+            const solutionText = question.get('solutionText')
+            const updatedAt = question.get('updatedAt').toISOString()
+            let user = question.get('createdBy')
+
+            user = {
+              id: user.id || undefined,
+              username: user.get('username'),
+              playerName: user.get('playerName'),
+              avatarUrl: user.get('avatarUrl')
+            }
+            const id = question.id
+            questionsResponse.push({
+              questionText,
+              answers,
+              difficulty,
+              user,
+              customTime,
+              id,
+              updatedAt,
+              solutionText
+            })
+          }
+
+          const gameResponse = {
+            player,
+            course,
+            rightAnswerCount,
+            id,
+            givenAnswers,
+            score,
+            difficulty,
+            withTimer,
+            playedAt,
+            questions: questionsResponse
+          }
+
+          gamesResponse.push(gameResponse)
+        }
+
+        return gamesResponse
+      } catch (error) {
+        throw error
+      }
     }
   }
 }
