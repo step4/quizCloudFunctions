@@ -8,6 +8,7 @@ automaticModuleDefinitions.push(require('./modules/question'))
 automaticModuleDefinitions.push(require('./modules/game'))
 automaticModuleDefinitions.push(require('./modules/friendRequest'))
 automaticModuleDefinitions.push(require('./modules/user'))
+automaticModuleDefinitions.push(require('./modules/stats'))
 
 Parse.Cloud.define('user_login', Auth.userLogin)
 Parse.Cloud.beforeSave(Parse.User, Auth.setStudentRole)
