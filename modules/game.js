@@ -77,7 +77,7 @@ module.exports = {
       let currentUser = request.user
       if (!(await isLoggedIn(currentUser))) return new Error('User not logged in')
 
-      const { gameId, givenAnswers, rightAnswerCount } = request.params
+      const { gameId, givenAnswers, rightAnswerCount, score } = request.params
 
       try {
         let game = await getObjectById(Game, gameId)
