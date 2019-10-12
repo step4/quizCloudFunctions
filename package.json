@@ -19,6 +19,6 @@
   "dependencies": {
     "axios": "^0.18.1",
     "axios-debug": "0.0.4",
-    "lodash": "^4.17.13"
+    "lodash": "^4.17.15"
   }
 }
