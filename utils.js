@@ -57,7 +57,7 @@ getObjectById = async (className, id) => {
     }
     return object
   } catch (error) {
-    throw error
+    return null
   }
 }
 getObjectByName = async (className, name) => {
@@ -81,7 +81,7 @@ getObjectByName = async (className, name) => {
     }
     return object
   } catch (error) {
-    throw error
+    return null
   }
 }
 

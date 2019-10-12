@@ -13,6 +13,7 @@ automaticModuleDefinitions.push(require('./modules/stats'))
 Parse.Cloud.define('user_login', Auth.userLogin)
 Parse.Cloud.beforeSave(Parse.User, Auth.setStudentRole)
 Parse.Cloud.afterSave(Parse.User, Auth.addUserToStudentRole)
+Parse.Cloud.afterSave(Parse.User, Auth.sendNotificationToAdmin)
 
 Parse.Cloud.define('server_startup', Startup.serverStartup)
 
